@@ -5,6 +5,9 @@ import { appConfig } from './config/app.config';
 import { dbConfig } from './config/db.config';
 import { User } from './modules/user/entities/user.entity';
 import { UserModule } from './modules/user/user.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import { AuthModule } from './modules/auth/auth.module';
+import { RedisCustomModule } from './client/redis.module';
 
 @Module({
   imports: [
@@ -24,11 +27,20 @@ import { UserModule } from './modules/user/user.module';
         database: configService.get<string>('dbConfig.dbName'),
         entities: [User],
         synchronize: true,
-        autoLoadEntities:true,
+        autoLoadEntities: true,
       }),
       inject: [ConfigService]
     }),
-   UserModule,
+    RedisModule.forRoot({
+      type: "single",
+      options: {
+        port: 6379,
+        host: "localhost"
+      }
+    }),
+    AuthModule,
+    UserModule,
+    RedisCustomModule
   ]
 })
 export class AppModule { }
