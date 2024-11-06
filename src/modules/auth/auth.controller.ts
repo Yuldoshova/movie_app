@@ -33,7 +33,7 @@ export class AuthController {
     }
 
     @UseGuards(AuthGuard("google"))
-    @Get('/google/callback')
+    @Get('/google')
     async googleAuth(
         @Req() request: any
     ) {

@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { JsonWebTokenError, JwtService, NotBeforeError, TokenExpiredError } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
@@ -24,7 +24,7 @@ export class AuthService {
     const findUser = result.data
     const otp = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000
 
-     await this.redisService.setValue({
+    await this.redisService.setValue({
       key: `otp-${findUser.id}`,
       value: otp,
       expireTime: parseInt(process.env.REDIS_EXPIRE_TIME)
@@ -45,6 +45,9 @@ export class AuthService {
   async checkOtp(payload: CheckOtpDto) {
     const result = await this.userService.findByEmail(payload.email)
     const findUser = result.data
+    if (!findUser) {
+      throw new NotFoundException("User not found❗")
+    }
     const storedOtp = await this.redisService.getValue(`otp-${payload.userId}`)
 
     if (!storedOtp || storedOtp.toString() !== payload.otp.toString()) {
@@ -132,7 +135,7 @@ export class AuthService {
 
   async googleAuth(req: any) {
 
-    const findUser = await (await this.userService.findByEmail(req.user.emails[0].value)).data
+    const findUser = (await this.userService.findByEmail(req.user.emails[0].value)).data
     if (findUser) {
       const accessToken = await this.jwt.signAsync(
         {
@@ -144,21 +147,30 @@ export class AuthService {
           secret: this.config.get<string>('jwt.accessKey'),
         },
       );
+      const refreshToken = await this.jwt.signAsync(
+        {
+          id: findUser.id,
+          role: findUser.role,
+        },
+        {
+          expiresIn: this.config.get<string>('jwt.refreshTime'),
+          secret: this.config.get<string>('jwt.refreshKey'),
+        },
+      );
 
-        return { accessToken, user: findUser, isNew: false }
+      return { user: findUser, isNew: false, accessToken, refreshToken }
     }
 
-    console.log(req.user)
-    const newUser = await this.userService.create({
-        firstName: req.user.displayName,
-        lastName:req.user.displayName,
-        email: req.user.emails[0].value,
-    })
-    
+    const newUser = (await this.userService.create({
+      firstName: req.user.name.givenName,
+      lastName: req.user.name.familyName,
+      email: req.user.emails[0].value,
+    })).data
+
     const accessToken = await this.jwt.signAsync(
       {
-        id: findUser.id,
-        role: findUser.role,
+        id: newUser.id,
+        role: newUser.role,
       },
       {
         expiresIn: this.config.get<number>('jwt.accessTime'),
@@ -166,6 +178,17 @@ export class AuthService {
       },
     );
 
-    return { accessToken, user: newUser, isNew: true }
-}
+    const refreshToken = await this.jwt.signAsync(
+      {
+        id: newUser.id,
+        role: newUser.role,
+      },
+      {
+        expiresIn: this.config.get<string>('jwt.refreshTime'),
+        secret: this.config.get<string>('jwt.refreshKey'),
+      },
+    );
+
+    return { user: newUser, isNew: true, accessToken, refreshToken }
+  }
 }
