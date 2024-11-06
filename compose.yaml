@@ -35,17 +35,23 @@ services:
       - 6379:${REDIS_PORT:-6379}
     networks:
       - movie-app
-  # server:
-  #   image: movie-app:1
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - 3000:${PORT:-3000}
-  #   depends_on:
-  #     - postgres
-  #     - redis
-  #   networks:
-  #     - movie-app
+  server:
+    image: node:20-alpine
+    container_name: server-movie-app
+    volumes:
+      - .:/usr/src/app           # Kodni ulash
+      - /usr/src/app/node_modules # node_modules uchun konteyner ichida saqlash
+    working_dir: /usr/src/app
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3000}:3000"
+    command: sh -c "npm install && npm run start:dev"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - movie-app                    # Umumiy tarmoqqa ulanish
 networks:
   movie-app:
     name: movie-app
