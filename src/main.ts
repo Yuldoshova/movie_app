@@ -6,8 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1')
-  app.useGlobalPipes(new ValidationPipe({ transform: true }))
+  app.setGlobalPrefix('api/v1');
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('MOVIE')
@@ -15,15 +15,19 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('apis')
     .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, documentFactory);
 
-  const config = app.get(ConfigService)
+  const config = app.get(ConfigService);
 
   await app.listen(
-    config.get<number>('appConfig.port'),
-    config.get<string>('appConfig.host'),
-    () => console.log(`Server running port on ${config.get<number>('appConfig.port')}`)
+    config.get<number>('APP_PORT'),
+    config.get<string>('APP_HOST'),
+    () =>
+      console.log(
+        `Server running port on ${config.get<number>('appConfig.port')}`,
+      ),
   );
 }
 bootstrap();

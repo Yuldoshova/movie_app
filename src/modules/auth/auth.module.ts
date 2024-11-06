@@ -8,8 +8,8 @@ import { User } from '../user/entities/user.entity';
 import { GoogleStrategy } from 'src/utils/strategies/google.strategy';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([User])],
-  controllers: [GoogleStrategy,AuthController],
+  imports: [TypeOrmModule.forFeature([User])],
+  controllers: [GoogleStrategy, AuthController],
   providers: [AuthService, UserService, RedisService],
 })
-export class AuthModule { }
+export class AuthModule {}
