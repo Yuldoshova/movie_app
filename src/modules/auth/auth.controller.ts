@@ -26,11 +26,9 @@ export class AuthController {
     return await this.authService.refresh(payload);
   }
 
-    @UseGuards(AuthGuard("google"))
-    @Get('/google')
-    async googleAuth(
-        @Req() request: any
-    ) {
-        return this.authService.googleAuth(request)
-    }
+  @UseGuards(AuthGuard('google'))
+  @Get('/google')
+  async googleAuth(@Req() request: any) {
+    return this.authService.googleAuth(request);
+  }
 }
