@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Get, Res } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RefreshDto } from './dto/refresh.dto';
 import { LoginDto } from './dto/login.dto';
 import { CheckOtpDto } from './dto/check-otp.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -30,5 +31,12 @@ export class AuthController {
     ) {
         return await this.authService.refresh(payload);
     }
-    
+
+    @UseGuards(AuthGuard("google"))
+    @Get('/google/callback')
+    async googleAuth(
+        @Req() request: any
+    ) {
+        return this.authService.googleAuth(request)
+    }
 }

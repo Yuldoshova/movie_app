@@ -129,4 +129,43 @@ export class AuthService {
       refreshToken,
     };
   }
+
+  async googleAuth(req: any) {
+
+    const findUser = await (await this.userService.findByEmail(req.user.emails[0].value)).data
+    if (findUser) {
+      const accessToken = await this.jwt.signAsync(
+        {
+          id: findUser.id,
+          role: findUser.role,
+        },
+        {
+          expiresIn: this.config.get<number>('jwt.accessTime'),
+          secret: this.config.get<string>('jwt.accessKey'),
+        },
+      );
+
+        return { accessToken, user: findUser, isNew: false }
+    }
+
+    console.log(req.user)
+    const newUser = await this.userService.create({
+        firstName: req.user.displayName,
+        lastName:req.user.displayName,
+        email: req.user.emails[0].value,
+    })
+    
+    const accessToken = await this.jwt.signAsync(
+      {
+        id: findUser.id,
+        role: findUser.role,
+      },
+      {
+        expiresIn: this.config.get<number>('jwt.accessTime'),
+        secret: this.config.get<string>('jwt.accessKey'),
+      },
+    );
+
+    return { accessToken, user: newUser, isNew: true }
+}
 }
