@@ -12,4 +12,4 @@ import { GoogleStrategy } from 'src/utils/strategies/google.strategy';
   controllers: [AuthController],
   providers: [GoogleStrategy, AuthService, UserService, RedisService],
 })
-export class AuthModule { }
+export class AuthModule {}

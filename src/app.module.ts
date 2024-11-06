@@ -18,7 +18,7 @@ import { emailConfig } from './config/email.config';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, dbConfig, jwtConfig, emailConfig]
+      load: [appConfig, dbConfig, jwtConfig, emailConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -33,14 +33,19 @@ import { emailConfig } from './config/email.config';
         synchronize: true,
         autoLoadEntities: true,
       }),
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
-    RedisModule.forRoot({
-      type: "single",
-      options: {
-        port: 6379,
-        host: "localhost"
-      }
+    RedisModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'single',
+        options: {
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
+          password: configService.get('REDIS_PASSWORD'),
+        },
+      }),
     }),
     JwtModule.register({
       secret: 'my secret',
@@ -55,18 +60,18 @@ import { emailConfig } from './config/email.config';
         transport: {
           host: configService.get<string>('emailConfig.host'),
           port: configService.get<number>('emailConfig.port'),
-          secure:false,
+          secure: false,
           auth: {
             user: configService.get<string>('emailConfig.username'),
             pass: configService.get<string>('emailConfig.password'),
           },
         },
       }),
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     AuthModule,
     UserModule,
-    RedisCustomModule
-  ]
+    RedisCustomModule,
+  ],
 })
-export class AppModule { }
+export class AppModule {}
