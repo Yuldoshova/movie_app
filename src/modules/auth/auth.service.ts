@@ -1,13 +1,12 @@
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnprocessableEntityException } from '@nestjs/common';
 import { JsonWebTokenError, JwtService, NotBeforeError, TokenExpiredError } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { RedisService } from 'src/client/redis.service';
 import { LoginDto } from './dto/login.dto';
 import { CheckOtpDto } from './dto/check-otp.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
@@ -15,48 +14,42 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private redisService: RedisService,
+    private mailService: MailerService,
     private config: ConfigService,
-    private jwt: JwtService
+    private jwt: JwtService,
   ) { }
-
-
-  // async login(loginDto: LoginDto) {
-
-  //   const result = await this.userService.findByEmail(loginDto)
-    // const otp = Math.floor(Math.random() * 100000 + 1)
-
-    // await this.redisService.setValue({
-    //   key: `otp-${result.data.id}`,
-    //   value: otp,
-    //   expireTime: 120
-    // })
-
-  //   return {
-  //     message: "Success✅",
-  //     otp
-  //   }
-  // }
-
-  async checkOtp(checkOtpDto: CheckOtpDto) {
-    const storedOtp = await this.redisService.getValue(`otp-${checkOtpDto.userId}`)
-    if (!storedOtp || storedOtp.toString() !== checkOtpDto.otp.toString()) {
-      throw new ConflictException("Invalid OTP❗")
-    }
-
-    return true
-  }
-
-/*
--email kiritadi
--otp kodni emailiga yuboradi (emailda url va kod keladi)
--kodni urlga kiritadi (unga access va refresh tokenlar beriladi)
-
-*/
 
   async login(payload: LoginDto) {
     const result = await this.userService.findByEmail(payload.email)
     const findUser = result.data
+    const otp = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000
 
+     await this.redisService.setValue({
+      key: `otp-${findUser.id}`,
+      value: otp,
+      expireTime: parseInt(process.env.REDIS_EXPIRE_TIME)
+    })
+
+    await this.mailService.sendMail({
+      from: this.config.get<string>('emailConfig.username'),
+      to: findUser.email,
+      subject: `Verification code for movie app`,
+      html: `<h2>Sizning verifikatsiya kodingiz:<h1>${otp}</h1></h2>`
+    });
+
+    return {
+      message: "Success✅",
+    }
+  }
+
+  async checkOtp(payload: CheckOtpDto) {
+    const result = await this.userService.findByEmail(payload.email)
+    const findUser = result.data
+    const storedOtp = await this.redisService.getValue(`otp-${payload.userId}`)
+
+    if (!storedOtp || storedOtp.toString() !== payload.otp.toString()) {
+      throw new ConflictException("Invalid OTP❗")
+    }
 
     const accessToken = await this.jwt.signAsync(
       {
@@ -84,7 +77,7 @@ export class AuthService {
       message: "Success✅",
       accessToken,
       refreshToken,
-    };
+    }
   }
 
   async refresh(payload: RefreshDto) {

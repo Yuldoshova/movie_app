@@ -10,13 +10,15 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RedisCustomModule } from './client/redis.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from './config/jwt.config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { emailConfig } from './config/email.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, dbConfig, jwtConfig]
+      load: [appConfig, dbConfig, jwtConfig, emailConfig]
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -46,6 +48,21 @@ import { jwtConfig } from './config/jwt.config';
       signOptions: {
         expiresIn: 60 * 15,
       },
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('emailConfig.host'),
+          port: configService.get<number>('emailConfig.port'),
+          secure:false,
+          auth: {
+            user: configService.get<string>('emailConfig.username'),
+            pass: configService.get<string>('emailConfig.password'),
+          },
+        },
+      }),
+      inject: [ConfigService]
     }),
     AuthModule,
     UserModule,
