@@ -1,22 +1,34 @@
-import { Controller, Post, Body, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { RefreshDto } from './dto/refresh.dto';
+import { LoginDto } from './dto/login.dto';
+import { CheckOtpDto } from './dto/check-otp.dto';
 
-@Controller('auth')
+@ApiTags("Auth")
+@Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+    constructor(private readonly authService: AuthService) { }
 
-  @Post('/login')
+    @Post('/login')
     async login(
-        @Body("email") email: string
+        @Body() payload: LoginDto
     ) {
-        return await this.authService.login(email)
+        return await this.authService.login(payload)
     }
 
     @Post('/check-otp')
     async checkotp(
-        @Body('otp', ParseIntPipe) otp: number,
-        @Body('userId', ParseIntPipe) userId: number,
+        @Body() payload: CheckOtpDto
     ) {
-        return await this.authService.checkOtp(otp, userId)
+        return await this.authService.checkOtp(payload)
     }
+
+    @Post('/refresh')
+    async refresh(
+        @Body() payload: RefreshDto
+    ) {
+        return await this.authService.refresh(payload);
+    }
+
 }

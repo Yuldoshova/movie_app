@@ -8,13 +8,15 @@ import { UserModule } from './modules/user/user.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisCustomModule } from './client/redis.module';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConfig } from './config/jwt.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, dbConfig]
+      load: [appConfig, dbConfig, jwtConfig]
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -37,6 +39,13 @@ import { RedisCustomModule } from './client/redis.module';
         port: 6379,
         host: "localhost"
       }
+    }),
+    JwtModule.register({
+      secret: 'my secret',
+      global: true,
+      signOptions: {
+        expiresIn: 60 * 15,
+      },
     }),
     AuthModule,
     UserModule,
