@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { appConfig, dbConfig } from '@config';
-import { User, UserModule } from '@modules';
-
+import { appConfig } from './config/app.config';
+import { dbConfig } from './config/db.config';
+import { User } from './modules/user/entities/user.entity';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { User, UserModule } from '@modules';
         database: configService.get<string>('dbConfig.dbName'),
         entities: [User],
         synchronize: true,
+        autoLoadEntities:true,
       }),
       inject: [ConfigService]
     }),

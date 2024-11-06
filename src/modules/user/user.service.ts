@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto, UpdateUserDto, User } from '@modules';
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -12,7 +14,19 @@ export class UserService {
 
   async create(create: CreateUserDto) {
 
-    const newUser = await this.userRepository.create(create)
+    const conflictUser = await this.userRepository.findOneBy({ email: create.email })
+    if (conflictUser) {
+      throw new ConflictException("Email already exists❗")
+    }
+
+    const newUser = this.userRepository.create({
+      email: create.email,
+      firstName: create.firstName,
+      lastName: create.lastName
+    })
+
+    await this.userRepository.save(newUser)
+
     return {
       message: "Success✅",
       data: newUser
@@ -39,18 +53,35 @@ export class UserService {
   }
 
   async update(id: number, update: UpdateUserDto) {
-    const findUser = await this.userRepository.findOne({ where: { id } })
+    const [findUser, conflictUser] = await Promise.all([
+      this.userRepository.findOne({ where: { id } }),
+      this.userRepository.findOneBy({ email: update.email })
+    ])
+
     if (!findUser) {
-      throw new NotFoundException("User not found!")
+      throw new NotFoundException("User not found❗")
     }
-    return `This action updates a #${id} user`;
+    if (conflictUser) {
+      throw new ConflictException("Email already exists❗")
+    }
+
+    await this.userRepository.update({ id }, { ...update })
+
+    return {
+      message: "Success✅",
+      data: id
+    }
   }
 
   async remove(id: number) {
     const findUser = await this.userRepository.findOne({ where: { id } })
     if (!findUser) {
-      throw new NotFoundException("User not found!")
+      throw new NotFoundException("User not found❗")
     }
-    return `This action removes a #${id} user`;
+    this.userRepository.delete({ id })
+    return {
+      message: "Success✅",
+      data: id
+    }
   }
 }
