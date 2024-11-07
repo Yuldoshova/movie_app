@@ -29,7 +29,7 @@ export class TranslateService {
       about: create.about,
       type: create.type
     })
-   await this.translateRepository.save(newTraslate)
+    await this.translateRepository.save(newTraslate)
     for (let key of Object.keys(create.definitions)) {
       const findlanguage = await this.languageRepository.findOne({ where: { code: key } })
 
@@ -45,7 +45,7 @@ export class TranslateService {
       })
       await this.definitionRepository.save(newDefinition)
     }
-
+    return newTraslate
   }
 
   async findAll() {

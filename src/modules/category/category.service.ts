@@ -47,12 +47,15 @@ export class CategoryService {
     return allCategories
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: number) {
+    return await this.categoryRepository.findOne({ where: { id } })
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: number, update: UpdateCategoryDto) {
+    const updatedCategory = await this.categoryRepository.update({ id }, {
+      description: update.description
+    })
+    return updatedCategory
   }
 
   remove(id: number) {

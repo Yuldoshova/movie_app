@@ -25,9 +25,9 @@ import { UserRoles } from 'src/utils/enums/user-role.enum';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) { }
 
-  // @ApiBearerAuth()
-  // @Protected(true)
-  // @Roles([UserRoles.ADMIN, UserRoles.USER])
+  @ApiBearerAuth()
+  @Protected(true)
+  @Roles([UserRoles.ADMIN, UserRoles.USER])
   @Post('/add')
   @UseInterceptors(FileInterceptor('image'))
   create(
@@ -56,7 +56,7 @@ export class CategoryController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoryService.update(+id, updateCategoryDto);
+    return this.categoryService.update(id, updateCategoryDto);
   }
 
   @Delete('/remove/:id')
