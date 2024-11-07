@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString } from 'class-validator';
-import { UploadFileRequest } from '../interfaces/upload=-file.interfaces';
+import { UploadFileRequest } from '../interfaces/upload-file.interfaces';
 // import { ApiProperty } from '@nestjs/swagger';
 
 export class UploadFileDto implements Omit<UploadFileRequest, 'file'> {

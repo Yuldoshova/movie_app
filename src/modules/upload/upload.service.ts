@@ -1,13 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Injectable } from '@nestjs/common';
-import {
-  RemoveFileRequest,
-  RemoveFileResponse,
-  UploadFileRequest,
-  UploadFileResponse,
-} from './interfaces';
 import { existsSync } from 'fs';
+import { UploadFileRequest, UploadFileResponse } from './interfaces/upload-file.interfaces';
+import { RemoveFileRequest, RemoveFileResponse } from './interfaces/remove-file.interfaces';
 
 @Injectable()
 export class UploadService {

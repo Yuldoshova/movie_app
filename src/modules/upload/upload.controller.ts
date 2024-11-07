@@ -6,12 +6,13 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { RemoveFileResponse, UploadFileResponse } from './interfaces';
 import { UploadService } from './upload.service';
-import { UploadFileDto } from './dtos/upload-files.dtos';
+import { UploadFileDto } from './dto/upload-files.dtos';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { RemoveFileDto } from './dtos';
 import { ApiTags } from '@nestjs/swagger';
+import { UploadFileResponse } from './interfaces/upload-file.interfaces';
+import { RemoveFileDto } from './dto/remove-files.dtos';
+import { RemoveFileResponse } from './interfaces/remove-file.interfaces';
 
 @ApiTags('Upload')
 @Controller('uploads')
