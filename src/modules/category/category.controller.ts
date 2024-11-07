@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseIntPipe,
+  Headers
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -22,11 +23,11 @@ import { UserRoles } from 'src/utils/enums/user-role.enum';
 @ApiTags('Category')
 @Controller('categories')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly categoryService: CategoryService) { }
 
-  @ApiBearerAuth()
-  @Protected(true)
-  @Roles([UserRoles.ADMIN, UserRoles.USER])
+  // @ApiBearerAuth()
+  // @Protected(true)
+  // @Roles([UserRoles.ADMIN, UserRoles.USER])
   @Post('/add')
   @UseInterceptors(FileInterceptor('image'))
   create(
@@ -37,14 +38,16 @@ export class CategoryController {
   }
 
   @Get('/all')
-  findAll() {
-    return this.categoryService.findAll();
+  findAll(
+    @Headers("accept-headers") languageCode: string
+  ) {
+    return this.categoryService.findAll(languageCode);
   }
 
   @Get('/single/:id')
   findOne(
     @Param('id', ParseIntPipe) id: number
-) {
+  ) {
     return this.categoryService.findOne(id);
   }
 

@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsUUID, MaxLength } from "class-validator"
+import { IsNotEmpty, IsNumber, IsString, IsUUID, MaxLength } from "class-validator"
 
 export class GetSingleTranslateDto {
 
@@ -7,5 +7,6 @@ export class GetSingleTranslateDto {
     languageCode: string
 
     @IsNumber()
+    @IsNotEmpty()
     translateId:number
 }

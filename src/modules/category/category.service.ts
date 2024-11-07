@@ -5,6 +5,7 @@ import { UploadService } from '../upload/upload.service';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TranslateService } from '../translate/translate.service';
 
 @Injectable()
 export class CategoryService {
@@ -12,7 +13,8 @@ export class CategoryService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
     private upload: UploadService,
-  ) {}
+    private translateService: TranslateService
+  ) { }
 
   async create(payload: CreateCategoryDto) {
     const fileOptions = await this.upload.uploadFile({
@@ -25,6 +27,7 @@ export class CategoryService {
       description: payload.description,
       image: fileOptions.imageUrl,
     });
+    await this.categoryRepository.save(newCategory)
 
     return {
       message: 'Success✅',
@@ -32,8 +35,16 @@ export class CategoryService {
     };
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async findAll(languageCode: string) {
+    const allCategories = await this.categoryRepository.find()
+    for (let c of allCategories) {
+      const translate = await this.translateService.findOne({
+        translateId: parseInt(c.name),
+        languageCode
+      })
+      c.name = translate
+    }
+    return allCategories
   }
 
   findOne(id: number) {

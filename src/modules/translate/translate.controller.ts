@@ -10,17 +10,17 @@ import { GetSingleTranslateDto } from './dto/get-single-translate.dto';
 export class TranslateController {
   constructor(private readonly translateService: TranslateService) { }
 
-  @Post()
+  @Post("/add")
   create(@Body() createTranslateDto: CreateTranslateDto) {
     return this.translateService.create(createTranslateDto);
   }
 
-  @Get()
+  @Get('/all')
   findAll() {
     return this.translateService.findAll();
   }
 
-  @Get(':id')
+  @Get('/single')
   findOne(
     @Body() payload: GetSingleTranslateDto
   ) {

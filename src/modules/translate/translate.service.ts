@@ -25,12 +25,11 @@ export class TranslateService {
   async create(create: CreateTranslateDto) {
 
 
-    const newTraslate = await this.translateRepository.create({
+    const newTraslate = this.translateRepository.create({
       about: create.about,
       type: create.type
-
     })
-
+   await this.translateRepository.save(newTraslate)
     for (let key of Object.keys(create.definitions)) {
       const findlanguage = await this.languageRepository.findOne({ where: { code: key } })
 
@@ -38,12 +37,13 @@ export class TranslateService {
         throw new NotFoundException(`Language ${key} not found!!!`)
       }
 
-      this.definitionRepository.create({
+      const newDefinition = this.definitionRepository.create({
         value: create.definitions[key],
         languageId: findlanguage.id,
         translateId: newTraslate.id
 
       })
+      await this.definitionRepository.save(newDefinition)
     }
 
   }

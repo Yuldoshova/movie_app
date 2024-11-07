@@ -19,7 +19,7 @@ export class LanguageController {
     return this.languageService.create({ ...createLanguageDto, image });
   }
 
-  @Get()
+  @Get("/all")
   findAll() {
     return this.languageService.findAll();
   }

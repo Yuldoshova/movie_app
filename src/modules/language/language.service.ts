@@ -26,6 +26,7 @@ export class LanguageService {
       title: payload.title,
       image: fileOptions.imageUrl
     })
+   await this.languageRepository.save(newLanguage)
     return {
       message: "Success✅",
       data: newLanguage

@@ -10,5 +10,6 @@ import { Definition } from './entities/definition.entity';
   imports: [TypeOrmModule.forFeature([Translate, Language, Definition])],
   controllers: [TranslateController],
   providers: [TranslateService],
+  // exports:[TranslateService]
 })
 export class TranslateModule { }
