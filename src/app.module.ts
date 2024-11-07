@@ -15,9 +15,17 @@ import { emailConfig } from './config/email.config';
 import { CategoryModule } from './modules/category/category.module';
 import { LanguageModule } from './modules/language/language.module';
 import { TranslateModule } from './modules/translate/translate.module';
+import { APP_GUARD } from '@nestjs/core';
+import { CheckRoleGuard } from './utils/guards/check-role.guard';
+import { CheckAuthGuard } from './utils/guards/check-auth.guard';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 30000,
+      limit: 300,
+    }]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -78,6 +86,20 @@ import { TranslateModule } from './modules/translate/translate.module';
     CategoryModule,
     LanguageModule,
     TranslateModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
+    },    
+    {
+      useClass: CheckAuthGuard,
+      provide: APP_GUARD,
+    },
+    {
+      useClass: CheckRoleGuard,
+      provide: APP_GUARD,
+    },
   ],
 })
 export class AppModule {}
