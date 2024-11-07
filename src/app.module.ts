@@ -12,6 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from './config/jwt.config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { emailConfig } from './config/email.config';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { emailConfig } from './config/email.config';
     AuthModule,
     UserModule,
     RedisCustomModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}
